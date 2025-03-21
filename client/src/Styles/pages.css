@@ -1,0 +1,77 @@
+input {
+  font-size: large;
+  color: aliceblue;
+  height: 6vh;
+  width: 17vw;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  outline: none;
+}
+.input {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  height: 8vh;
+  width: 20vw;
+  border-radius: 12px;
+  background-color: #0e1c34a5;
+  box-shadow: inset -5px -4px 4px #1c2e52, inset 4px 5px 4px #111111e6;
+}
+.btn {
+  color: #8a8a8a;
+  height: 5vh;
+  width: 6vw;
+  font-size: medium;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  background-color: #0e1c34a5;
+  box-shadow: 3px 3px 8px #000000, -1px -1px 6px #ffffff66;
+}
+.btn:active {
+  box-shadow: inset 2px 2px 6px #000000, inset -1px -1px 4px #ffffff66;
+}
+#CIRCLE {
+  box-shadow: 3px 3px 6px #000000, -1px -1px 6px #ffffff66;
+}
+@media screen and (min-width: 600px) and (max-width: 1024px) {
+  .input {
+    width: 35vw;
+  }
+  input {
+    width: 27vw;
+  }
+  .btn {
+    width: 12vw;
+  }
+}
+@media screen and (min-width: 200px) and (max-width: 640px) {
+  .input {
+    width: 60vw;
+  }
+  input {
+    width: 45vw;
+  }
+  .btn {
+    width: 24vw;
+  }
+  #CIRCLE {
+    height: 13vh;
+    width: 25vw;
+  }
+  #CIRCLE img {
+    height: 12vh;
+    width: 24vw;
+  }
+}
+@media screen and (min-width: 400px) and (max-width: 640px) {
+  #CIRCLE {
+    width: 17vw;
+  }
+  #CIRCLE img {
+    width: 15vw;
+  }
+}
