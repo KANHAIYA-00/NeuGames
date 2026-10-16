@@ -18,7 +18,6 @@ import waiting from "./Models/waitingQ.js";
 dotenv.config();
 
 const port = process.env.PORT || 3000;
-const ip = "192.168.90.62";
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -37,7 +36,7 @@ app.use(
     origin: process.env.CLIENT_URL,
     methods: ["GET", "POST"],
     credentials: true,
-  })
+  }),
 );
 app.get("/", (req, res) => {
   res.send("Hello World");
@@ -95,5 +94,5 @@ ticTacToeNamespace.on("connection", (socket) => {
 });
 
 server.listen(port, () => {
-  console.log(`Server running at ${ip}:${port}`);
+  console.log(`Server running successfully on port ${port}`);
 });
