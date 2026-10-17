@@ -20,24 +20,54 @@ dotenv.config();
 const port = process.env.PORT || 3000;
 const app = express();
 const server = createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL,
-    methods: ["GET", "POST"],
-    credentials: true,
+
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(",")
+  : [];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (
+      !origin ||
+      allowedOrigins.indexOf(origin) !== -1 ||
+      origin === "http://localhost:5173"
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error("Blocked by CORS security policies"));
+    }
   },
-});
+  methods: ["GET", "POST"],
+  credentials: true,
+};
+
+const io = new Server(server, { cors: corsOptions });
+
 connectDB();
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL,
-    methods: ["GET", "POST"],
-    credentials: true,
-  }),
-);
+app.use(cors(corsOptions));
+
+// const io = new Server(server, {
+//   cors: {
+//     origin: process.env.CLIENT_URL,
+//     methods: ["GET", "POST"],
+//     credentials: true,
+//   },
+// });
+// connectDB();
+// app.use(express.json());
+// app.use(cookieParser());
+
+// app.use(
+//   cors({
+//     origin: process.env.CLIENT_URL,
+//     methods: ["GET", "POST"],
+//     credentials: true,
+//   }),
+// );
+
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
