@@ -80,10 +80,20 @@ ticTacToeNamespace.on("connection", (socket) => {
   socket.on("change", (data, partner) => {
     ticTacToeNamespace.to(partner).emit("update", data);
   });
-  socket.on("win", (winner, partner) => {
+  socket.on("win", async (winner, partner) => {
+    try {
+      await waiting.deleteMany({ SocketID: { $in: [socket.id, partner] } });
+    } catch (err) {
+      console.error("Error cleaning DB on win:", err);
+    }
     ticTacToeNamespace.to(partner).emit("result", winner);
   });
-  socket.on("draw", (partner) => {
+  socket.on("draw", async (partner) => {
+    try {
+      await waiting.deleteMany({ SocketID: { $in: [socket.id, partner] } });
+    } catch (err) {
+      console.error("Error cleaning DB on draw:", err);
+    }
     ticTacToeNamespace.to(partner).emit("result", "draw");
   });
   socket.on("disconnect", async () => {
