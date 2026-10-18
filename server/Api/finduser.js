@@ -42,13 +42,13 @@ router.post("/", async (req, res) => {
           username: user.Username,
         },
         process.env.SECRET_KEY,
-        { expiresIn: "1h" }
+        { expiresIn: "1h" },
       );
 
       res.cookie("NeuGames", token, {
         httpOnly: true,
-        secure: false,
-        sameSite: "Strict",
+        secure: true,
+        sameSite: "none",
       });
       res.status(200).json({ Message: "Login successful." });
     } catch (error) {
