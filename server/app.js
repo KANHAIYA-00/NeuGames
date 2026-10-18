@@ -61,11 +61,11 @@ ticTacToeNamespace.on("connection", (socket) => {
           username: { $ne: user.username },
         });
         if (partner) {
+          await waiting.deleteMany({ username: user.username });
           await waiting.deleteMany({ SocketID: partner.SocketID });
           ticTacToeNamespace.to(partner.SocketID).emit("paired", user);
           ticTacToeNamespace.to(socket.id).emit("paired", partner);
         } else {
-          await waiting.deleteMany({ username: user.username });
           await waiting.create({
             SocketID: user.SocketID,
             username: user.username,
