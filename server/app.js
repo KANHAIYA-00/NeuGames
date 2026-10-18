@@ -57,15 +57,15 @@ ticTacToeNamespace.on("connection", (socket) => {
   socket.on("start", async (user) => {
     if (user.username) {
       try {
-        const partner = await waiting.findOne({
+        const partner = await waiting.findOneAndDelete({
           username: { $ne: user.username },
         });
         if (partner) {
-          await waiting.deleteMany({ username: user.username });
-          await waiting.deleteMany({ SocketID: partner.SocketID });
+          // await waiting.deleteMany({ SocketID: partner.SocketID });
           ticTacToeNamespace.to(partner.SocketID).emit("paired", user);
           ticTacToeNamespace.to(socket.id).emit("paired", partner);
         } else {
+          await waiting.deleteMany({ username: user.username });
           await waiting.create({
             SocketID: user.SocketID,
             username: user.username,
@@ -80,23 +80,11 @@ ticTacToeNamespace.on("connection", (socket) => {
   socket.on("change", (data, partner) => {
     ticTacToeNamespace.to(partner).emit("update", data);
   });
-  socket.on("win", async (winner, partner) => {
-    try {
-      const delResult = await waiting.deleteMany({ username: user.username });
-      console.log(delResult);
-    } catch (error) {
-      console.error("Error deleting socket:", error);
-    }
+  socket.on("win", (winner, partner) => {
     ticTacToeNamespace.to(partner).emit("result", winner);
   });
-  socket.on("draw", async (partner) => {
-    try {
-      const delResult = await waiting.deleteMany({ username: user.username });
-      console.log(delResult);
-    } catch (error) {
-      console.error("Error deleting socket:", error);
-      ticTacToeNamespace.to(partner).emit("result", "draw");
-    }
+  socket.on("draw", (partner) => {
+    ticTacToeNamespace.to(partner).emit("result", "draw");
   });
   socket.on("disconnect", async () => {
     try {
