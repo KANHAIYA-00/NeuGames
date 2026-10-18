@@ -82,17 +82,19 @@ ticTacToeNamespace.on("connection", (socket) => {
   });
   socket.on("win", async (winner, partner) => {
     try {
-      await waiting.deleteMany({ SocketID: { $in: [socket.id, partner] } });
-    } catch (err) {
-      console.error("Error cleaning DB on win:", err);
+      const delResult = await waiting.deleteMany({ SocketID: socket.id });
+      console.log(delResult);
+    } catch (error) {
+      console.error("Error deleting socket:", error);
     }
     ticTacToeNamespace.to(partner).emit("result", winner);
   });
   socket.on("draw", async (partner) => {
     try {
-      await waiting.deleteMany({ SocketID: { $in: [socket.id, partner] } });
-    } catch (err) {
-      console.error("Error cleaning DB on draw:", err);
+      const delResult = await waiting.deleteMany({ SocketID: socket.id });
+      console.log(delResult);
+    } catch (error) {
+      console.error("Error deleting socket:", error);
     }
     ticTacToeNamespace.to(partner).emit("result", "draw");
   });
