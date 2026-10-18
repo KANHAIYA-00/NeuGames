@@ -1,6 +1,6 @@
 import { useMemo, useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { createRoot } from "react-dom/client";
+// import { createRoot } from "react-dom/client";
 import { io } from "socket.io-client";
 import { ToastContainer } from "react-toastify";
 import { Error, Warn } from "../../src/Functions/Toastify.jsx";
@@ -20,9 +20,9 @@ const TicTacToe = () => {
       io(`${import.meta.env.VITE_SERVER_URL}Game/Tic-tac-toe`, {
         reconnectionAttempts: 5,
         secure: true,
-        transports: ["websocket", "polling"],
+        transports: ["websocket"],
       }),
-    []
+    [],
   );
   const location = useLocation();
   const [user, setUser] = useState({});
@@ -72,16 +72,21 @@ const TicTacToe = () => {
     });
     socket.on("update", (data) => {
       moves.current[data.i][data.j] = data.player;
-      const root = createRoot(
-        document.getElementById(`cell-${data.i}-${data.j}`)
-      );
-      {
-        data.player === "O"
-          ? root.render(<BCircle />)
-          : data.player === "X"
-          ? root.render(<BCross />)
-          : "";
+
+      const targetCell = document.getElementById(`cell-${data.i}-${data.j}`);
+      if (targetCell) {
+        targetCell.innerHTML = data.player === "O" ? BCircle : BCross;
       }
+      // const root = createRoot(
+      //   document.getElementById(`cell-${data.i}-${data.j}`),
+      // );
+      // {
+      //   data.player === "O"
+      //     ? root.render(<BCircle />)
+      //     : data.player === "X"
+      //       ? root.render(<BCross />)
+      //       : "";
+      // }
       setPlay((play) => !play);
     });
     socket.on("result", (winner) => {
@@ -108,7 +113,7 @@ const TicTacToe = () => {
       socket.emit(
         "win",
         { name: user.username, avatar: user.avatar },
-        partner.SocketID
+        partner.SocketID,
       );
       setDisplay("");
     }
@@ -163,14 +168,18 @@ const TicTacToe = () => {
     if (partner.username && play === true) {
       if (moves.current[i][j] === null) {
         moves.current[i][j] = player;
-        const root = createRoot(e.target);
-        {
-          player === "O"
-            ? root.render(<BCircle />)
-            : player === "X"
-            ? root.render(<BCross />)
-            : "";
-        }
+
+        e.currentTarget.innerHTML = player === "O" ? BCircle : BCross;
+
+        // const root = createRoot(e.target);
+        // {
+        //   player === "O"
+        //     ? root.render(<BCircle />)
+        //     : player === "X"
+        //       ? root.render(<BCross />)
+        //       : "";
+        // }
+
         setPlay((play) => !play);
         setCount(count + 1);
         socket.emit("change", { i, j, player }, partner.SocketID);
