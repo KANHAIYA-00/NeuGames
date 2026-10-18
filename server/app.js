@@ -57,10 +57,9 @@ ticTacToeNamespace.on("connection", (socket) => {
   socket.on("start", async (user) => {
     if (user.username) {
       try {
-        // const partner = await waiting.findOne();
-        const partner = await waiting.findOneAndDelete();
+        const partner = await waiting.findOne();
         if (partner) {
-          // await waiting.deleteMany({ SocketID: partner.SocketID });
+          await waiting.deleteMany({ SocketID: partner.SocketID });
           ticTacToeNamespace.to(partner.SocketID).emit("paired", user);
           ticTacToeNamespace.to(socket.id).emit("paired", partner);
         } else {
