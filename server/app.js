@@ -57,7 +57,15 @@ ticTacToeNamespace.on("connection", (socket) => {
   socket.on("start", async (user) => {
     if (user.username) {
       try {
-        const partner = await waiting.findOne();
+        // const partner = await waiting.findOne();
+        const partner = await waiting.findOneAndDelete(
+          {
+            SocketID: { $ne: socket.id }, // Prevents pairing with yourself
+          },
+          {
+            sort: { createdAt: 1 }, // Pairs with the player who has waited longest (requires a timestamp field)
+          },
+        );
         if (partner) {
           await waiting.deleteMany({ SocketID: partner.SocketID });
           ticTacToeNamespace.to(partner.SocketID).emit("paired", user);
