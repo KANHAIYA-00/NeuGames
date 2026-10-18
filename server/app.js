@@ -53,100 +53,45 @@ app.use("/api/delete", deleteUser);
 app.use("/api/update", updateUser);
 
 const ticTacToeNamespace = io.of("/Game/Tic-tac-toe");
-
-// Store waiting players in-memory for instant matchmaking (No DB lag)
-let waitingQueue = [];
-
 ticTacToeNamespace.on("connection", (socket) => {
-  socket.on("start", (user) => {
-    if (!user.username) return;
-
-    // 1. Safety check: Filter out any dead or stale queue entries from this user
-    waitingQueue = waitingQueue.filter(
-      (p) => p.username !== user.username && p.SocketID !== socket.id,
-    );
-
-    // 2. Check if another distinct opponent is waiting
-    if (waitingQueue.length > 0) {
-      const partner = waitingQueue.shift(); // Remove the opponent instantly from queue
-
-      // Connect them
-      ticTacToeNamespace
-        .to(partner.SocketID)
-        .emit("paired", { ...user, isPlayerX: false });
-      ticTacToeNamespace
-        .to(socket.id)
-        .emit("paired", { ...partner, isPlayerX: true });
-    } else {
-      // 3. Queue is empty, safely add current player
-      waitingQueue.push({
-        SocketID: socket.id,
-        username: user.username,
-        avatar: user.avatar,
-      });
+  socket.on("start", async (user) => {
+    if (user.username) {
+      try {
+        const partner = await waiting.findOne();
+        if (partner) {
+          await waiting.deleteMany({ SocketID: partner.SocketID });
+          ticTacToeNamespace.to(partner.SocketID).emit("paired", user);
+          ticTacToeNamespace.to(socket.id).emit("paired", partner);
+        } else {
+          await waiting.create({
+            SocketID: user.SocketID,
+            username: user.username,
+            avatar: user.avatar,
+          });
+        }
+      } catch (err) {
+        console.log(err);
+      }
     }
   });
-
   socket.on("change", (data, partner) => {
     ticTacToeNamespace.to(partner).emit("update", data);
   });
-
   socket.on("win", (winner, partner) => {
     ticTacToeNamespace.to(partner).emit("result", winner);
   });
-
   socket.on("draw", (partner) => {
     ticTacToeNamespace.to(partner).emit("result", "draw");
   });
-
-  socket.on("disconnect", () => {
-    // Instantly remove player from matchmaking array if they close tab or lag out
-    waitingQueue = waitingQueue.filter(
-      (player) => player.SocketID !== socket.id,
-    );
+  socket.on("disconnect", async () => {
+    try {
+      const delResult = await waiting.deleteMany({ SocketID: socket.id });
+      console.log(delResult);
+    } catch (error) {
+      console.error("Error deleting socket:", error);
+    }
   });
 });
-
-// const ticTacToeNamespace = io.of("/Game/Tic-tac-toe");
-// ticTacToeNamespace.on("connection", (socket) => {
-//   socket.on("start", async (user) => {
-//     if (user.username) {
-//       try {
-//         const partner = await waiting.findOne();
-//         if (partner) {
-//           await waiting.deleteMany({ SocketID: partner.SocketID });
-//           ticTacToeNamespace.to(partner.SocketID).emit("paired", user);
-//           ticTacToeNamespace.to(socket.id).emit("paired", partner);
-//         } else {
-//           await waiting.create({
-//             SocketID: user.SocketID,
-//             username: user.username,
-//             avatar: user.avatar,
-//           });
-//         }
-//       } catch (err) {
-//         console.log(err);
-//       }
-//     }
-//   });
-//   socket.on("change", (data, partner) => {
-//     ticTacToeNamespace.to(partner).emit("update", data);
-//   });
-//   socket.on("win", (winner, partner) => {
-//     ticTacToeNamespace.to(partner).emit("result", winner);
-//   });
-//   socket.on("draw", (partner) => {
-//     ticTacToeNamespace.to(partner).emit("result", "draw");
-//   });
-//   socket.on("disconnect", async () => {
-//     try {
-//       const delResult = await waiting.deleteMany({ SocketID: socket.id });
-//       console.log(delResult);
-//     } catch (error) {
-//       console.error("Error deleting socket:", error);
-//     }
-//   });
-// });
 
 server.listen(port, () => {
   console.log(`Server running successfully on port ${port}`);
