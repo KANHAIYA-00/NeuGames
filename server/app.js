@@ -82,7 +82,7 @@ ticTacToeNamespace.on("connection", (socket) => {
   });
   socket.on("win", async (winner, partner) => {
     try {
-      const delResult = await waiting.deleteMany({ SocketID: socket.id });
+      const delResult = await waiting.deleteMany({ username: user.username });
       console.log(delResult);
     } catch (error) {
       console.error("Error deleting socket:", error);
@@ -91,12 +91,12 @@ ticTacToeNamespace.on("connection", (socket) => {
   });
   socket.on("draw", async (partner) => {
     try {
-      const delResult = await waiting.deleteMany({ SocketID: socket.id });
+      const delResult = await waiting.deleteMany({ username: user.username });
       console.log(delResult);
     } catch (error) {
       console.error("Error deleting socket:", error);
+      ticTacToeNamespace.to(partner).emit("result", "draw");
     }
-    ticTacToeNamespace.to(partner).emit("result", "draw");
   });
   socket.on("disconnect", async () => {
     try {
