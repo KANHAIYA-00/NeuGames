@@ -13,7 +13,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import deletecookie from "./Middlewares/deletecookie.js";
 import authenticateToken from "./Middlewares/authenticate.js";
-// import waiting from "./Models/waitingQ.js";
+import waiting from "./Models/waitingQ.js";
 
 dotenv.config();
 
